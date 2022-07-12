@@ -7,6 +7,22 @@ from redbot.core import commands, Config, checks
 class AccountAgeFlagger(commands.Cog):
 	"""Class to manage flagging accounts under a specified age"""
 
+	async def _cfg_set(self, ctx: commands.Context) -> bool:
+		cfg = self.config.guild(ctx.guild)
+		nvr = await cfg.needs_verification_role()
+		nvl = await cfg.needs_verification_log()
+		vr = await cfg.verifier_role()
+		ad = await cfg.account_age_minimum_days()
+
+		nvr = ctx.guild.get_role(nvr)
+		nvl = ctx.guild.get_channel(nvl)
+		vr = ctx.guild.get_role(vr)
+
+		return (nvr is not None and
+				nvl is not None and
+				vr is not None and
+				ad is not None)
+
 	def __init__(self, bot: commands.Bot) -> None:
 		self.bot = bot
 		self.config = Config.get_conf(self, identifier=51360816380568, force_registration=True)
@@ -20,38 +36,26 @@ class AccountAgeFlagger(commands.Cog):
 		self.config.register_guild(**def_guild)
 	
 	@commands.Cog.listener()
-	async def on_member_join(self, ctx: commands.Context, member: discord.Member):
-		day_cutoff: int = self.config.guild(ctx.guild).account_age_minimum_days()
-		mem_age: datetime = member.created_at
-		mem_delta: timedelta = mem_age - datetime.now()
-		if(mem_delta.days > day_cutoff):
+	async def on_member_join(self, ctx: commands.Context, member: discord.Member, debug: bool = False):
+		if(await self._cfg_set() == False):
+			if(debug): await ctx.send("Config not set correctly!")
 			return
-		
-		guild: discord.Guild = ctx.guild
-		
-		role: discord.Role = guild.get_role(self.config.guild(ctx.guild).needs_verification_role())
-		await member.add_roles(role)
 
-		verifier_role: discord.Role = guild.get_role(await self.config.guild(ctx.guild).verifier_role())
-		channel: discord.TextChannel = guild.get_channel(await self.config.guild(ctx.guild).needs_verification_log())
-		channel.send("[VERIFICATION]: {} is only {} days old! {}".format(member.mention, mem_delta.days, verifier_role.mention))
-
-	async def test_command(self, ctx: commands.Context):
 		member: discord.Member = ctx.author
-		await ctx.send("Running test on {}".format(member.display_name))
-
 		day_cutoff: int = await self.config.guild(ctx.guild).account_age_minimum_days()
-		await ctx.send("Age cutoff is {}".format(day_cutoff))
-
 		mem_age: datetime = member.created_at
 		mem_delta: timedelta = datetime.now() - mem_age
-		await ctx.send("Member age is {}".format(mem_delta.days))
+
+		if(debug):
+			await ctx.send("Running test on {}".format(member.display_name))
+			await ctx.send("Age cutoff is {}".format(day_cutoff))
+			await ctx.send("Member age is {}".format(mem_delta.days))
+
 		if(mem_delta.days > day_cutoff):
-			await ctx.send("Member is not going to be flagged but continuing test")
-			# return
+			if(debug): await ctx.send("Member is not going to be flagged but continuing test")
+			else: return
 		
 		guild: discord.Guild = ctx.guild
-		
 		role: discord.Role = guild.get_role(await self.config.guild(ctx.guild).needs_verification_role())
 		await member.add_roles(role)
 
@@ -69,13 +73,13 @@ class AccountAgeFlagger(commands.Cog):
 		elif(subcom == "test_self"):
 			cfg: config = self.config.guild(ctx.guild)
 			resp = "Config:\n\
-				```\n\
-				needs_verification_role =  {}\n\
-				needs_verification_log =   {}\n\
-				verifier_role =            {}\n\
-				account_age_minimum_days = {}\n\
-				```".format(await cfg.needs_verification_role(), await cfg.needs_verification_log(), await cfg.verifier_role(), await cfg.account_age_minimum_days())
+```\n\
+needs_verification_role =  {}\n\
+needs_verification_log =   {}\n\
+verifier_role =            {}\n\
+account_age_minimum_days = {}\n\
+```".format(await cfg.needs_verification_role(), await cfg.needs_verification_log(), await cfg.verifier_role(), await cfg.account_age_minimum_days())
 			await ctx.send(resp)
-			await self.test_command(ctx)
+			await self.on_member_join(ctx, ctx.author, dbg=True)
 		else:
 			await self.account_age(ctx, "")
