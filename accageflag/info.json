@@ -1,0 +1,10 @@
+{
+    "author": ["ZephyrTFA"],
+    "name": "Account Age Flagger",
+    "short": "Automatically flags new Discord users.",
+    "description": "Automatically flags new Discord users when they join the server based on their account age.",
+    "permissions" : ["Manage Messages", "Manage Roles"],
+    "tags": [
+        "Utility"
+    ]
+}
