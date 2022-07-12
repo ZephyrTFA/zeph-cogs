@@ -23,13 +23,13 @@ class AccountAgeFlagger(commands.Cog):
 
 		if(debug): await ctx.send("nvr: {}, nvl: {}, vr: {}, ad: {}".format(nvr, nvl, vr, ad))
 
-		return (nvr is not None and
-				nvl is not None and
-				vr is not None and
-				ad is not None)
+		return (nvr != None and
+				nvl != None and
+				vr != None and
+				ad != None)
 
 	async def get_role(self, ctx: commands.Context, role_id: int, debug=False) -> discord.Role:
-		if(role_id is not int):
+		if(isinstance(role_id, int) == False):
 			role_id = int(role_id)
 			if(debug): await ctx.send("had to convert role_id to int?")
 		roles: list[discord.Role] = await ctx.guild.fetch_roles()
@@ -89,7 +89,7 @@ class AccountAgeFlagger(commands.Cog):
 			if(cfg_name not in ["needs_verification_role", "needs_verification_log", "verifier_role", "account_age_minimum_days"]):
 				await ctx.send("Unknown config key?")
 				return
-			if(cfg_val is str):
+			if(isinstance(cfg_val, str)):
 				cfg_val = int(cfg_val)
 			cfg = self.config.guild(ctx.guild)
 			await getattr(cfg, cfg_name).set(cfg_val)
