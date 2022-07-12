@@ -11,18 +11,25 @@ class AccountAgeFlagger(commands.Cog):
 	"""Class to manage flagging accounts under a specified age"""
 
 	async def _cfg_set(self, ctx: commands.Context, debug: bool = False) -> bool:
-		cfg = self.config.guild(ctx.guild)
-		for key in ["needs_verification_role", "needs_verification_log", "verifier_role", "account_age_minimum_days"]:
-			val = eval("await cfg.{}()".format(key))
-			if(val is str):
-				await getattr(cfg, key).set(int(val))
-				if(debug): await ctx.send("Corrected the formatting of {}, it was a str?".format(key))
+		cfg: Config = self.config.guild(ctx.guild)
 
 		nvr = await cfg.needs_verification_role()
 		nvl = await cfg.needs_verification_log()
 		vr = await cfg.verifier_role()
 		ad = await cfg.account_age_minimum_days()
 
+		if(nvr is str):
+			if(debug): await ctx.send("Correcting the formatting of `needs_verification_role`")
+			await cfg.needs_verification_role.set(nvr = int(nvr))
+		if(nvl is str):
+			if(debug): await ctx.send("Correcting the formatting of `needs_verification_log`")
+			await cfg.needs_verification_log.set(nvl = int(nvl))
+		if(vr is str):
+			if(debug): await ctx.send("Correcting the formatting of `verifier_role`")
+			await cfg.verifier_role.set(vr = int(vr))
+		if(ad is str):
+			if(debug): await ctx.send("Correcting the formatting of `account_age_minimum_days`")
+			await cfg.account_age_minimum_days.set(ad = int(ad))
 
 		nvr = ctx.guild.get_role(nvr)
 		nvl = ctx.guild.get_channel(nvl)
