@@ -30,7 +30,6 @@ class AccountAgeFlagger(commands.Cog):
 
 	async def get_role(self, ctx: commands.Context, role_id, debug=False) -> discord.Role:
 		roles: list[discord.Role] = await ctx.guild.fetch_roles()
-		if(debug): await ctx.send("dbg: {} roles = {}".format(roles.__len__, roles))
 		for role in roles:
 			if(debug): await ctx.send("role {} = {}".format(role.name, role.id))
 			if(role.id == role_id):
