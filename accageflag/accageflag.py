@@ -37,7 +37,7 @@ class AccountAgeFlagger(commands.Cog):
 	
 	@commands.Cog.listener()
 	async def on_member_join(self, ctx: commands.Context, member: discord.Member, debug: bool = False):
-		if(await self._cfg_set() == False):
+		if(await self._cfg_set(ctx) == False):
 			if(debug): await ctx.send("Config not set correctly!")
 			return
 
