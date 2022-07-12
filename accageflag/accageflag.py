@@ -69,12 +69,12 @@ class AccountAgeFlagger(commands.Cog):
 		if(subcom == ""):
 			await ctx.send("Subcommands: `configset`, `configget`, `test_self`")
 		elif(subcom == "configset"):
-			if(cfg_val is "None"): cfg_val = None
+			if(cfg_val == "None"): cfg_val = None
 			if(cfg_name not in ["needs_verification_role", "needs_verification_log", "verifier_role", "account_age_minimum_days"]):
 				await ctx.send("Unknown config key?")
 				return
 			cfg = self.config.guild(ctx.guild)
-			await cfg[cfg_name].set(cfg_val)
+			await getattr(cfg, cfg_name).set(cfg_val)
 			await ctx.send("{} set to {}".format(cfg_name, cfg_val))
 		elif(subcom == "configget"):
 			cfg: config = self.config.guild(ctx.guild)
