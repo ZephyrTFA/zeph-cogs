@@ -10,23 +10,16 @@ class AccountAgeFlagger(commands.Cog):
 	async def _cfg_set(self, ctx: commands.Context, debug: bool = False) -> bool:
 		cfg: Config = self.config.guild(ctx.guild)
 
-		nvr = await cfg.needs_verification_role()
-		nvl = await cfg.needs_verification_log()
-		vr = await cfg.verifier_role()
-		ad = await cfg.account_age_minimum_days()
+		nvr = int(await cfg.needs_verification_role())
+		nvl = int(await cfg.needs_verification_log())
+		vr = int(await cfg.verifier_role())
+		ad = int(await cfg.account_age_minimum_days())
 
-		if(debug): await ctx.send("nvr: {}, nvl: {}, vr: {}, ad: {}".format(nvr, nvl, vr, ad))
+		nvr = await ctx.guild.get_role(nvr)
+		nvl = await ctx.guild.get_role(nvl)
+		vr = await ctx.guild.get_role(vr)
 
-		nvr = await self.get_role(ctx, nvr)
-		nvl = await self.get_role(ctx, nvl)
-		vr = await self.get_role(ctx, vr, debug)
-
-		if(debug): await ctx.send("nvr: {}, nvl: {}, vr: {}, ad: {}".format(nvr, nvl, vr, ad))
-
-		return (nvr != None and
-				nvl != None and
-				vr != None and
-				ad != None)
+		return (nvr != None and nvl != None and vr != None and ad != None)
 
 	async def get_role(self, ctx: commands.Context, role_id: int, debug=False) -> discord.Role:
 		if(isinstance(role_id, int) == False):
@@ -38,6 +31,12 @@ class AccountAgeFlagger(commands.Cog):
 			if(role.id == role_id):
 				return role
 		return None
+	
+	async def get_chan(self, ctx: commands.Context, channel_id: int, debug=False) -> discord.TextChannel:
+		if(isinstance(channel_id, int) == False):
+			channel_id = int(channel_id)
+			if(debug): await ctx.send("had to convert channel_id to int?")
+		
 
 	def __init__(self, bot: commands.Bot) -> None:
 		self.bot = bot
@@ -58,7 +57,7 @@ class AccountAgeFlagger(commands.Cog):
 			return
 
 		member: discord.Member = ctx.author
-		day_cutoff: int = await self.config.guild(ctx.guild).account_age_minimum_days()
+		day_cutoff: int = int(await self.config.guild(ctx.guild).account_age_minimum_days())
 		mem_age: datetime = member.created_at
 		mem_delta: timedelta = datetime.now() - mem_age
 
@@ -72,11 +71,11 @@ class AccountAgeFlagger(commands.Cog):
 			else: return
 		
 		guild: discord.Guild = ctx.guild
-		role: discord.Role = guild.get_role(await self.config.guild(ctx.guild).needs_verification_role())
+		role: discord.Role = guild.get_role(int(await self.config.guild(ctx.guild).needs_verification_role()))
 		await member.add_roles(role)
 
-		verifier_role: discord.Role = guild.get_role(await self.config.guild(ctx.guild).verifier_role())
-		channel: discord.TextChannel = guild.get_channel(await self.config.guild(ctx.guild).needs_verification_log())
+		verifier_role: discord.Role = guild.get_role(int(await self.config.guild(ctx.guild).verifier_role()))
+		channel: discord.TextChannel = guild.get_channel(int(await self.config.guild(ctx.guild).needs_verification_log()))
 		channel.send("[VERIFICATION]: {} is only {} days old! {}".format(member.mention, mem_delta.days, verifier_role.mention))
 
 	@commands.command()
