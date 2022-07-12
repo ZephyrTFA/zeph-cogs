@@ -1,12 +1,7 @@
-from calendar import c
 from datetime import datetime, timedelta
 from distutils.command.config import config
-import math
-from numbers import Number
 import discord
-from discord.utils import get
 from redbot.core import commands, Config, checks
-from yaml import parse
 
 
 class AccountAgeFlagger(commands.Cog):
