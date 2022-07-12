@@ -18,25 +18,13 @@ class AccountAgeFlagger(commands.Cog):
 		vr = await cfg.verifier_role()
 		ad = await cfg.account_age_minimum_days()
 
-		if(nvr is str):
-			if(debug): await ctx.send("Correcting the formatting of `needs_verification_role`")
-			await cfg.needs_verification_role.set(nvr = int(nvr))
-		if(nvl is str):
-			if(debug): await ctx.send("Correcting the formatting of `needs_verification_log`")
-			await cfg.needs_verification_log.set(nvl = int(nvl))
-		if(vr is str):
-			if(debug): await ctx.send("Correcting the formatting of `verifier_role`")
-			await cfg.verifier_role.set(vr = int(vr))
-		if(ad is str):
-			if(debug): await ctx.send("Correcting the formatting of `account_age_minimum_days`")
-			await cfg.account_age_minimum_days.set(ad = int(ad))
+		if(debug): await ctx.send("nvr: {}, nvl: {}, vr: {}, ad: {}".format(nvr, nvl, vr, ad))
 
 		nvr = ctx.guild.get_role(nvr)
 		nvl = ctx.guild.get_channel(nvl)
 		vr = ctx.guild.get_role(vr)
 
-		if(debug):
-			await ctx.send("nvr: {}, nvl: {}, vr: {}, ad: {}".format(nvr, nvl, vr, ad))
+		if(debug): await ctx.send("nvr: {}, nvl: {}, vr: {}, ad: {}".format(nvr, nvl, vr, ad))
 
 		return (nvr is not None and
 				nvl is not None and
@@ -109,13 +97,4 @@ account_age_minimum_days = {}\n\
 ```".format(await cfg.needs_verification_role(), await cfg.needs_verification_log(), await cfg.verifier_role(), await cfg.account_age_minimum_days())
 			await ctx.send(resp)
 		elif(subcom == "test_self"):
-			cfg: config = self.config.guild(ctx.guild)
-			resp = "Config:\n\
-```\n\
-needs_verification_role =  {}\n\
-needs_verification_log =   {}\n\
-verifier_role =            {}\n\
-account_age_minimum_days = {}\n\
-```".format(await cfg.needs_verification_role(), await cfg.needs_verification_log(), await cfg.verifier_role(), await cfg.account_age_minimum_days())
-			await ctx.send(resp)
 			await self.on_member_join(ctx, ctx.author, debug=True)
