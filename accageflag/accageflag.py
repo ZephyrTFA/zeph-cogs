@@ -65,11 +65,26 @@ class AccountAgeFlagger(commands.Cog):
 
 	@commands.command()
 	@checks.admin()
-	async def aaf(self, ctx: commands.Context, subcom: str):
+	async def aaf(self, ctx: commands.Context, subcom: str = "", cfg_name = "", cfg_val = ""):
 		if(subcom == ""):
-			await ctx.send("Subcommands: `config`, `test_self`")
-		elif(subcom == "config"):
-			return
+			await ctx.send("Subcommands: `configset`, `configget`, `test_self`")
+		elif(subcom == "configset"):
+			if(cfg_val is "None"): cfg_val = None
+			if(cfg_name not in ["needs_verification_role", "needs_verification_log", "verifier_role", "account_age_minimum_days"]):
+				await ctx.send("Unknown config key?")
+				return
+			cfg = self.config.guild(ctx.guild)
+			await cfg[cfg_name].set(cfg_val)
+			await ctx.send("{} set to {}".format(cfg_name, cfg_val))
+		elif(subcom == "configget"):
+			cfg: config = self.config.guild(ctx.guild)
+			resp = "Config:\n\
+```\n\
+needs_verification_role =  {}\n\
+needs_verification_log =   {}\n\
+verifier_role =            {}\n\
+account_age_minimum_days = {}\n\
+```".format(await cfg.needs_verification_role(), await cfg.needs_verification_log(), await cfg.verifier_role(), await cfg.account_age_minimum_days())
 		elif(subcom == "test_self"):
 			cfg: config = self.config.guild(ctx.guild)
 			resp = "Config:\n\
