@@ -12,10 +12,17 @@ class AccountAgeFlagger(commands.Cog):
 
 	async def _cfg_set(self, ctx: commands.Context, debug: bool = False) -> bool:
 		cfg = self.config.guild(ctx.guild)
+		for key in ["needs_verification_role", "needs_verification_log", "verifier_role", "account_age_minimum_days"]:
+			val = await getattr(cfg, key)
+			if(val is str):
+				await getattr(cfg, key).set(int(val))
+				if(debug): await ctx.send("Corrected the formatting of {}, it was a str?".format(key))
+
 		nvr = await cfg.needs_verification_role()
 		nvl = await cfg.needs_verification_log()
 		vr = await cfg.verifier_role()
 		ad = await cfg.account_age_minimum_days()
+
 
 		nvr = ctx.guild.get_role(nvr)
 		nvl = ctx.guild.get_channel(nvl)
