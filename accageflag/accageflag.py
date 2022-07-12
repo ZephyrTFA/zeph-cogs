@@ -59,7 +59,7 @@ class AccountAgeFlagger(commands.Cog):
 
 		verifier_role: discord.Role = guild.get_role(int(await self.config.guild(ctx.guild).verifier_role()))
 		channel: discord.TextChannel = guild.get_channel(int(await self.config.guild(ctx.guild).needs_verification_log()))
-		channel.send("[VERIFICATION]: {} is only {} days old! {}".format(member.mention, mem_delta.days, verifier_role.mention))
+		await channel.send("[VERIFICATION]: {} is only {} days old! {}".format(member.mention, mem_delta.days, verifier_role.mention))
 
 	@commands.command()
 	@checks.admin()
