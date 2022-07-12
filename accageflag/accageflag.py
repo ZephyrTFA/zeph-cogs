@@ -3,6 +3,7 @@ from distutils.command.config import config
 import math
 from numbers import Number
 import discord
+from discord.utils import get
 from redbot.core import commands, Config, checks
 from yaml import parse
 
@@ -20,9 +21,9 @@ class AccountAgeFlagger(commands.Cog):
 
 		if(debug): await ctx.send("nvr: {}, nvl: {}, vr: {}, ad: {}".format(nvr, nvl, vr, ad))
 
-		nvr = ctx.guild.get_role(nvr)
-		nvl = ctx.guild.get_channel(nvl)
-		vr = ctx.guild.get_role(vr)
+		nvr = self.get_role(ctx.guild, nvr)
+		nvl = self.get_role(ctx.guild, nvl)
+		vr = self.get_role(ctx.guild, vr)
 
 		if(debug): await ctx.send("nvr: {}, nvl: {}, vr: {}, ad: {}".format(nvr, nvl, vr, ad))
 
@@ -30,6 +31,9 @@ class AccountAgeFlagger(commands.Cog):
 				nvl is not None and
 				vr is not None and
 				ad is not None)
+
+	def get_role(self, guild: discord.Guild, role_id) -> discord.Role:
+		return get(guild.roles, id=role_id)
 
 	def __init__(self, bot: commands.Bot) -> None:
 		self.bot = bot
