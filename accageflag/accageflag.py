@@ -1,3 +1,4 @@
+from calendar import c
 from datetime import datetime, timedelta
 from distutils.command.config import config
 import math
@@ -21,9 +22,9 @@ class AccountAgeFlagger(commands.Cog):
 
 		if(debug): await ctx.send("nvr: {}, nvl: {}, vr: {}, ad: {}".format(nvr, nvl, vr, ad))
 
-		nvr = self.get_role(ctx.guild, nvr)
-		nvl = self.get_role(ctx.guild, nvl)
-		vr = self.get_role(ctx.guild, vr)
+		nvr = await self.get_role(ctx.guild, nvr)
+		nvl = await self.get_role(ctx.guild, nvl)
+		vr = await self.get_role(ctx.guild, vr)
 
 		if(debug): await ctx.send("nvr: {}, nvl: {}, vr: {}, ad: {}".format(nvr, nvl, vr, ad))
 
@@ -32,8 +33,8 @@ class AccountAgeFlagger(commands.Cog):
 				vr is not None and
 				ad is not None)
 
-	def get_role(self, guild: discord.Guild, role_id) -> discord.Role:
-		return get(guild.roles, id=role_id)
+	async def get_role(self, guild: discord.Guild, role_id) -> discord.Role:
+		return get(await guild.fetch_roles(), id=role_id)
 
 	def __init__(self, bot: commands.Bot) -> None:
 		self.bot = bot
