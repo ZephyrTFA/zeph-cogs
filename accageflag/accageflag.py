@@ -45,7 +45,7 @@ class AccountAgeFlagger(commands.Cog):
 
 		mem_age: datetime = member.created_at
 		mem_delta: timedelta = mem_age - datetime.now()
-		await ctx.send("Member age is {}", mem_delta)
+		await ctx.send("Member age is {}".format(mem_delta))
 		if(mem_delta.days > day_cutoff):
 			return
 		
