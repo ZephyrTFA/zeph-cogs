@@ -28,10 +28,11 @@ class AccountAgeFlagger(commands.Cog):
 				vr is not None and
 				ad is not None)
 
-	async def get_role(self, guild: discord.Guild, role_id) -> discord.Role:
-		roles: list[discord.Role] = await guild.fetch_roles()
-		print("dbg: {} roles = {}".format(roles.__len__, roles))
-		for role in await guild.fetch_roles():
+	async def get_role(self, ctx: commands.Context, role_id, debug=False) -> discord.Role:
+		roles: list[discord.Role] = await ctx.guild.fetch_roles()
+		if(debug): await ctx.send("dbg: {} roles = {}".format(roles.__len__, roles))
+		for role in roles:
+			if(debug): await ctx.send("role {} = {}".format(role.name, role.id))
 			if(role.id == role_id):
 				return role
 		return None
