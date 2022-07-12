@@ -1,7 +1,10 @@
 from datetime import datetime, timedelta
 from distutils.command.config import config
+import math
+from numbers import Number
 import discord
 from redbot.core import commands, Config, checks
+from yaml import parse
 
 
 class AccountAgeFlagger(commands.Cog):
@@ -76,6 +79,8 @@ class AccountAgeFlagger(commands.Cog):
 			if(cfg_name not in ["needs_verification_role", "needs_verification_log", "verifier_role", "account_age_minimum_days"]):
 				await ctx.send("Unknown config key?")
 				return
+			if(cfg_val is str):
+				cfg_val = int(cfg_val)
 			cfg = self.config.guild(ctx.guild)
 			await getattr(cfg, cfg_name).set(cfg_val)
 			await ctx.send("{} set to {}".format(cfg_name, cfg_val))
