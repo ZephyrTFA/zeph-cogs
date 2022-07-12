@@ -15,9 +15,9 @@ class AccountAgeFlagger(commands.Cog):
 		vr = int(await cfg.verifier_role())
 		ad = int(await cfg.account_age_minimum_days())
 
-		nvr = await ctx.guild.get_role(nvr)
-		nvl = await ctx.guild.get_channel(nvl)
-		vr = await ctx.guild.get_role(vr)
+		nvr = ctx.guild.get_role(nvr)
+		nvl = ctx.guild.get_channel(nvl)
+		vr = ctx.guild.get_role(vr)
 
 		return (nvr != None and nvl != None and vr != None and ad != None)
 
