@@ -80,6 +80,6 @@ verifier_role =            {}\n\
 account_age_minimum_days = {}\n\
 ```".format(await cfg.needs_verification_role(), await cfg.needs_verification_log(), await cfg.verifier_role(), await cfg.account_age_minimum_days())
 			await ctx.send(resp)
-			await self.on_member_join(ctx, ctx.author, dbg=True)
+			await self.on_member_join(ctx, ctx.author, debug=True)
 		else:
 			await self.account_age(ctx, "")
