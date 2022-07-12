@@ -17,9 +17,9 @@ class AccountAgeFlagger(commands.Cog):
 
 		if(debug): await ctx.send("nvr: {}, nvl: {}, vr: {}, ad: {}".format(nvr, nvl, vr, ad))
 
-		nvr = await self.get_role(ctx, nvr, debug)
+		nvr = await self.get_role(ctx, nvr)
 		nvl = await self.get_role(ctx, nvl)
-		vr = await self.get_role(ctx, vr)
+		vr = await self.get_role(ctx, vr, debug)
 
 		if(debug): await ctx.send("nvr: {}, nvl: {}, vr: {}, ad: {}".format(nvr, nvl, vr, ad))
 
@@ -28,7 +28,10 @@ class AccountAgeFlagger(commands.Cog):
 				vr is not None and
 				ad is not None)
 
-	async def get_role(self, ctx: commands.Context, role_id, debug=False) -> discord.Role:
+	async def get_role(self, ctx: commands.Context, role_id: int, debug=False) -> discord.Role:
+		if(role_id is not int):
+			role_id = int(role_id)
+			if(debug): await ctx.send("had to convert role_id to int?")
 		roles: list[discord.Role] = await ctx.guild.fetch_roles()
 		for role in roles:
 			if(debug): await ctx.send("role {} = {}".format(role.name, role.id))
