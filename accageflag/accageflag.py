@@ -16,27 +16,10 @@ class AccountAgeFlagger(commands.Cog):
 		ad = int(await cfg.account_age_minimum_days())
 
 		nvr = await ctx.guild.get_role(nvr)
-		nvl = await ctx.guild.get_role(nvl)
+		nvl = await ctx.guild.get_channel(nvl)
 		vr = await ctx.guild.get_role(vr)
 
 		return (nvr != None and nvl != None and vr != None and ad != None)
-
-	async def get_role(self, ctx: commands.Context, role_id: int, debug=False) -> discord.Role:
-		if(isinstance(role_id, int) == False):
-			role_id = int(role_id)
-			if(debug): await ctx.send("had to convert role_id to int?")
-		roles: list[discord.Role] = await ctx.guild.fetch_roles()
-		for role in roles:
-			if(debug): await ctx.send("role {} = {}".format(role.name, role.id))
-			if(role.id == role_id):
-				return role
-		return None
-	
-	async def get_chan(self, ctx: commands.Context, channel_id: int, debug=False) -> discord.TextChannel:
-		if(isinstance(channel_id, int) == False):
-			channel_id = int(channel_id)
-			if(debug): await ctx.send("had to convert channel_id to int?")
-		
 
 	def __init__(self, bot: commands.Bot) -> None:
 		self.bot = bot
