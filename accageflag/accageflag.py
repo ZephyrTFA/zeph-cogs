@@ -17,7 +17,7 @@ class AccountAgeFlagger(commands.Cog):
 
 		if(debug): await ctx.send("nvr: {}, nvl: {}, vr: {}, ad: {}".format(nvr, nvl, vr, ad))
 
-		nvr = await self.get_role(ctx, nvr)
+		nvr = await self.get_role(ctx, nvr, debug)
 		nvl = await self.get_role(ctx, nvl)
 		vr = await self.get_role(ctx, vr)
 
