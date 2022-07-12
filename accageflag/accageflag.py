@@ -30,26 +30,30 @@ class AccountAgeFlagger(commands.Cog):
 		role: discord.Role = guild.get_role(self.config.guild(ctx.guild).needs_verification_role())
 		await member.add_roles(role)
 
-		verifier_role: discord.Role = guild.get_role(self.config.guild(ctx.guild).verifier_role())
-		channel: discord.TextChannel = guild.get_channel(self.config.guild(ctx.guild).needs_verification_log())
+		verifier_role: discord.Role = guild.get_role(await self.config.guild(ctx.guild).verifier_role())
+		channel: discord.TextChannel = guild.get_channel(await self.config.guild(ctx.guild).needs_verification_log())
 		channel.send("[VERIFICATION]: {} is only {} days old! {}".format(member.mention, mem_delta.days, verifier_role.mention))
 
 	@commands.command()
 	@checks.admin()
 	async def test_command(self, ctx: commands.Context):
 		member: discord.Member = ctx.author
+		await ctx.send("Running test on {}".format(member.display_name))
 
-		day_cutoff: int = self.config.guild(ctx.guild).account_age_minimum_days()
+		day_cutoff: int = await self.config.guild(ctx.guild).account_age_minimum_days()
+		await ctx.send("Age cutoff is {}".format(day_cutoff))
+
 		mem_age: datetime = member.created_at
 		mem_delta: timedelta = mem_age - datetime.now()
+		await ctx.send("Member age is {}", mem_delta)
 		if(mem_delta.days > day_cutoff):
 			return
 		
 		guild: discord.Guild = ctx.guild
 		
-		role: discord.Role = guild.get_role(self.config.guild(ctx.guild).needs_verification_role())
+		role: discord.Role = guild.get_role(await self.config.guild(ctx.guild).needs_verification_role())
 		await member.add_roles(role)
 
-		verifier_role: discord.Role = guild.get_role(self.config.guild(ctx.guild).verifier_role())
-		channel: discord.TextChannel = guild.get_channel(self.config.guild(ctx.guild).needs_verification_log())
+		verifier_role: discord.Role = guild.get_role(await self.config.guild(ctx.guild).verifier_role())
+		channel: discord.TextChannel = guild.get_channel(await self.config.guild(ctx.guild).needs_verification_log())
 		channel.send("[VERIFICATION]: {} is only {} days old! {}".format(member.mention, mem_delta.days, verifier_role.mention))
