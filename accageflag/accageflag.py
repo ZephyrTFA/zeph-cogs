@@ -7,7 +7,7 @@ from redbot.core import commands, Config, checks
 class AccountAgeFlagger(commands.Cog):
 	"""Class to manage flagging accounts under a specified age"""
 
-	async def _cfg_set(self, ctx: commands.Context) -> bool:
+	async def _cfg_set(self, ctx: commands.Context, debug: bool = False) -> bool:
 		cfg = self.config.guild(ctx.guild)
 		nvr = await cfg.needs_verification_role()
 		nvl = await cfg.needs_verification_log()
@@ -17,6 +17,9 @@ class AccountAgeFlagger(commands.Cog):
 		nvr = ctx.guild.get_role(nvr)
 		nvl = ctx.guild.get_channel(nvl)
 		vr = ctx.guild.get_role(vr)
+
+		if(debug):
+			await ctx.send("nvr: {}, nvl: {}, vr: {}, ad: {}".format(nvr, nvl, vr, ad))
 
 		return (nvr is not None and
 				nvl is not None and
@@ -37,7 +40,7 @@ class AccountAgeFlagger(commands.Cog):
 	
 	@commands.Cog.listener()
 	async def on_member_join(self, ctx: commands.Context, member: discord.Member, debug: bool = False):
-		if(await self._cfg_set(ctx) == False):
+		if(await self._cfg_set(ctx, debug) == False):
 			if(debug): await ctx.send("Config not set correctly!")
 			return
 
