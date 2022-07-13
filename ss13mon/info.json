@@ -1,0 +1,10 @@
+{
+    "author": ["ZephyrTFA"],
+    "name": "SpaceStation13 Server Monitor",
+    "short": "Monitors information for a SS13 server with a supporting Topic API.",
+    "description": "Monitors information for a SS13 server with a supporting Topic API.",
+    "permissions" : ["Manage Messages"],
+    "tags": [
+        "Utility", "SS13"
+    ]
+}
