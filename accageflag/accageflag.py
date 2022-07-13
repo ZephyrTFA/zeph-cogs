@@ -34,12 +34,17 @@ class AccountAgeFlagger(commands.Cog):
 		self.config.register_guild(**def_guild)
 	
 	@commands.Cog.listener()
-	async def on_member_join(self, ctx: commands.Context, member: discord.Member, debug: bool = False):
+	async def on_member_join(self, ctx: commands.Context, member: discord.Member = None, debug: bool = False):
 		if(await self._cfg_set(ctx, debug) == False):
 			if(debug): await ctx.send("Config not set correctly!")
 			return
 
-		member: discord.Member = ctx.author
+		if(isinstance(ctx, commands.Context)):
+			member = ctx.author
+		elif(isinstance(ctx, discord.Member)):
+			member = ctx
+		else: raise Exception("unable to determine method call context")
+
 		day_cutoff: int = int(await self.config.guild(ctx.guild).account_age_minimum_days())
 		mem_age: datetime = member.created_at
 		mem_delta: timedelta = datetime.now() - mem_age
