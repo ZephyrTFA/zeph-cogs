@@ -43,6 +43,10 @@ class SS13Mon(commands.Cog):
 			await cfg.address.set(value)
 		elif(key == "port"):
 			await cfg.port.set((int(value), None)[value == None])
+		elif(key == "channel"):
+			await self.delete_message(ctx.guild)
+			await cfg.channel.set((int(value), None)[value == None])
+			await self.update_guild_message(ctx.guild)
 		elif(key == "update"):
 			await self.update_guild_message(ctx.guild)
 			await ctx.send("Forcibly triggered a guild update")
@@ -131,5 +135,24 @@ class SS13Mon(commands.Cog):
 			await cfg.message_id.set(cached.id)
 		else:
 			cached = await channel.fetch_message(message)
+			if(cached == None): cached = await channel.send("caching initial context")
 		
 		cached.edit(content=None, embed=(await self.generate_embed()))
+	
+	async def delete_message(self, guild: discord.Guild):
+		cfg = self.config.guild(guild)
+		channel = await cfg.channel()
+		if(channel == None):
+			return
+		channel: discord.TextChannel = await guild.get_channel(channel)
+		if(isinstance(channel, discord.TextChannel) == False):
+			return
+		
+		message = await cfg.message_id()
+		cached: discord.Message
+		if(message == None):
+			return
+		else:
+			cached = await channel.fetch_message(message)
+		
+		await cached.delete()
