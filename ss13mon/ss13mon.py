@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+from threading import Timer
 from time import time
 import discord
 from redbot.core import commands, Config, checks
@@ -7,27 +8,13 @@ import socket
 import struct
 import urllib.parse
 
-class AsyncTimer:
-	def __init__(self, timeout, callback, args = []):
-		self._timeout = timeout
-		self._callback = callback
-		self._args = args
-		self._task = asyncio.ensure_future(self._job())
-
-	async def _job(self):
-		await asyncio.sleep(self._timeout)
-		await self._callback(*self._args)
-
-	def cancel(self):
-		self._task.cancel()
-
 class SS13Mon(commands.Cog):
 	_tick_timers: dict = dict()
 	config: Config
 
 	def cog_unload(self):
 		for key in self._tick_timers:
-			timer: AsyncTimer = self._tick_timers[key]
+			timer: Timer = self._tick_timers[key]
 			timer.cancel()
 		return super().cog_unload()
 
@@ -159,7 +146,7 @@ class SS13Mon(commands.Cog):
 			conn.close()
 
 	async def update_guild_message(self, guild: discord.Guild):
-		existing_timer: AsyncTimer = self._tick_timers.pop(guild.id, None)
+		existing_timer: Timer = self._tick_timers.pop(guild.id, None)
 		if(not existing_timer == None): existing_timer.cancel()
 
 		cfg = self.config.guild(guild)
@@ -187,8 +174,11 @@ class SS13Mon(commands.Cog):
 		if(update_interval == None or update_interval == 0):
 			return
 
-		new_timer: AsyncTimer = AsyncTimer(update_interval, self.update_guild_message, [guild])
+		new_timer: Timer = Timer(update_interval, self._timer_wrapper, [guild])
 		self._tick_timers[guild.id] = new_timer
+	
+	def _timer_wrapper(self, guild):
+		asyncio.gather(self.update_guild_message(guild))
 	
 	async def delete_message(self, guild: discord.Guild):
 		cfg = self.config.guild(guild)
