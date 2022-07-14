@@ -82,7 +82,7 @@ class SS13Mon(commands.Cog):
 			last_title = (await cfg.last_title()) or "Failed to fetch data"
 			last_online = await cfg.last_online() or "Unknown"
 			if(isinstance(last_online, float)): last_online = datetime.fromtimestamp(last_online)
-			await ctx.channel.send(embed=discord.Embed(type="rich", color=discord.Colour.red, title=last_title, timestamp=datetime.now()).add_field(name="Server Offline", value="Last Round: `{}`\nLast Seen: `{}`".format(last_roundid, last_online)))
+			await ctx.channel.send(embed=discord.Embed(type="rich", color=discord.Colour.red(), title=last_title, timestamp=datetime.now()).add_field(name="Server Offline", value="Last Round: `{}`\nLast Seen: `{}`".format(last_roundid, last_online)))
 			return
 
 		roundid = int(status["round_id"][0])
@@ -96,7 +96,7 @@ class SS13Mon(commands.Cog):
 		await cfg.last_title.set(servtitle)
 		await cfg.last_online.set(time())
 
-		embbie: discord.Embed = discord.Embed(type="rich", color=discord.Colour.blue, title=servtitle, timestamp=datetime.now())
+		embbie: discord.Embed = discord.Embed(type="rich", color=discord.Colour.blue(), title=servtitle, timestamp=datetime.now())
 
 		value_inf = "Round ID: `{}`\nPlayers: `{}`\nTIDI: `{}%`".format(roundid, player_count, time_dilation_avg)
 		embbie.add_field(name="Server Information", value=value_inf)
