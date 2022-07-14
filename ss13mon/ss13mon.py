@@ -80,7 +80,8 @@ class SS13Mon(commands.Cog):
 		if(status == None):
 			last_roundid = (await cfg.last_roundid()) or "Unknown"
 			last_title = (await cfg.last_title()) or "Failed to fetch data"
-			last_online = (datetime.fromtimestamp(await cfg.last_online())) or "Unknown"
+			last_online = await cfg.last_online() or "Unknown"
+			if(isinstance(last_online, float)): last_online = datetime.fromtimestamp(last_online)
 			await ctx.channel.send(embed=discord.Embed(type="rich", color=discord.Colour.red, title=last_title, timestamp=datetime.now()).add_field(name="Server Offline", value="Last Round: `{}`\nLast Seen: `{}`".format(last_roundid, last_online)))
 			return
 
