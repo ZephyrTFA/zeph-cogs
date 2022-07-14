@@ -1,9 +1,6 @@
 import asyncio
 from datetime import datetime
-from dis import disco
-from sqlite3 import Timestamp
 from time import time
-from turtle import update
 import discord
 from redbot.core import commands, Config, checks
 from threading import Timer
