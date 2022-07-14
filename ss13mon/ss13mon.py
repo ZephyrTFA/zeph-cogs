@@ -12,7 +12,7 @@ import urllib.parse
 
 class SS13Mon(commands.Cog):
 	config: Config
-	_tasks: 'list[asyncio.Handle]'
+	_tasks: 'list[asyncio.Task]'
 
 	def cog_unload(self):
 		for task in self._tasks:
@@ -37,9 +37,16 @@ class SS13Mon(commands.Cog):
 			"last_online": None,
 		}
 		self.config.register_guild(**def_guild)
-
 		for guild in self.bot.guilds:
-			self._tasks.append(asyncio.get_event_loop().create_task(self.update_guild_message(guild)))
+			self.start_guild_update_loop(guild)
+	
+	def start_guild_update_loop(self, guild):
+		task = asyncio.get_event_loop().create_task(self.update_guild_message(guild))
+		self._tasks.append(task)
+		task.add_done_callback(self._handle_task_completion)
+	
+	def _handle_task_completion(self, future: asyncio.Task):
+		self._tasks.remove(future)
 
 	@commands.command()
 	async def ss13status(self, ctx: commands.Context, p=41372):
@@ -81,7 +88,7 @@ class SS13Mon(commands.Cog):
 
 	@ss13mon.command()
 	async def update(self, ctx: commands.Context):
-		self._tasks.append(asyncio.get_event_loop().create_task(self.update_guild_message(ctx.guild)))
+		self.start_guild_update_loop(ctx.guild)
 		await ctx.send("Forced a guild update.")
 
 	@ss13mon.command()
