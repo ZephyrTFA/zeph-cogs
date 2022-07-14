@@ -38,6 +38,9 @@ class SS13Mon(commands.Cog):
 		}
 		self.config.register_guild(**def_guild)
 
+		for guild in self.bot.guilds:
+			self._tasks.append(asyncio.get_event_loop().create_task(self.update_guild_message(guild)))
+
 	@commands.command()
 	async def ss13status(self, ctx: commands.Context, p=41372):
 		await ctx.channel.send(embed=(await self.generate_embed(ctx.guild)))
