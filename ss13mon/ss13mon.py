@@ -82,10 +82,10 @@ class SS13Mon(commands.Cog):
 
 		field_visi = "Visible Players ({})".format(len(players))
 		value_visi = "```{}```".format(", ".join(players))
-		embbie.add_field(field_visi, value_visi)
+		embbie.add_field(name=field_visi, value=value_visi)
 
 		value_inf = "Round ID: `{}`\nPlayers: `{}`\nTIDI: `{}%`".format(roundid, player_count, time_dilation_avg)
-		embbie.add_field("Server Information", value_inf)
+		embbie.add_field(name="Server Information", value=value_inf)
 
 		await ctx.channel.send(embed=embbie)
 
