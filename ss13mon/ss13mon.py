@@ -134,8 +134,10 @@ class SS13Mon(commands.Cog):
 			cached = await channel.send("caching initial context")
 			await cfg.message_id.set(cached.id)
 		else:
-			cached = await channel.fetch_message(message)
-			if(cached == None): cached = await channel.send("caching initial context")
+			try:
+				cached = await channel.fetch_message(message)
+			except(discord.NotFound):
+				cached = await channel.send("caching initial context")
 		
 		cached.edit(content=None, embed=(await self.generate_embed(guild)))
 	
