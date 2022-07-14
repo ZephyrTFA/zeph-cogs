@@ -9,7 +9,7 @@ import struct
 import urllib.parse
 
 class SS13Mon(commands.Cog):
-	_tick_timers: dict
+	_tick_timers: dict = dict()
 	config: Config
 
 	def cog_unload(self):
