@@ -12,9 +12,16 @@ import urllib.parse
 
 class SS13Mon(commands.Cog):
 	config: Config
+	_tasks: 'list[asyncio.Handle]'
+
+	def cog_unload(self):
+		for task in self._tasks:
+			task.cancel()
+		return super().cog_unload()
 
 	def __init__(self, bot: commands.Bot) -> None:
 		self.bot = bot
+		self._tasks = list()
 		self.config = Config.get_conf(self, identifier=854168416161, force_registration=True)
 
 		def_guild = {
@@ -71,7 +78,7 @@ class SS13Mon(commands.Cog):
 
 	@ss13mon.command()
 	async def update(self, ctx: commands.Context):
-		asyncio.get_event_loop().call_soon_threadsafe(self.update_guild_message(ctx.guild))
+		self._tasks.append(asyncio.get_event_loop().create_task(self.update_guild_message(ctx.guild)))
 		await ctx.send("Forced a guild update.")
 
 	@ss13mon.command()
