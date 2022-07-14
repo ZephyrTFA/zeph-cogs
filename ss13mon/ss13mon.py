@@ -159,6 +159,9 @@ class SS13Mon(commands.Cog):
 			conn.close()
 
 	async def update_guild_message(self, guild: discord.Guild):
+		existing_timer: AsyncTimer = self._tick_timers.pop(guild.id, None)
+		if(not existing_timer == None): existing_timer.cancel()
+
 		cfg = self.config.guild(guild)
 		channel = await cfg.channel()
 		if(channel == None):
@@ -184,11 +187,8 @@ class SS13Mon(commands.Cog):
 		if(update_interval == None or update_interval == 0):
 			return
 
-		new_timer: AsyncTimer = AsyncTimer(update_interval, self._wrap_update, [guild])
+		new_timer: AsyncTimer = AsyncTimer(update_interval, self.update_guild_message, [guild])
 		self._tick_timers[guild.id] = new_timer
-	
-	def _wrap_update(self, guild):
-		asyncio.gather(self.update_guild_message(guild))
 	
 	async def delete_message(self, guild: discord.Guild):
 		cfg = self.config.guild(guild)
