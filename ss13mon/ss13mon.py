@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+import random
 from threading import Timer
 from time import time
 import discord
@@ -24,6 +25,7 @@ class SS13Mon(commands.Cog):
 
 		def_guild = {
 			"update_interval": 10,
+			"update_hash": None,
 			"channel": None,
 			"address": None,
 			"port": None,
@@ -81,7 +83,7 @@ class SS13Mon(commands.Cog):
 	@ss13mon.command()
 	async def update_interval(self, ctx: commands.Context, value = None):
 		cfg = self.config.guild(ctx.guild)
-		await cfg.update_interval.set(value)
+		await cfg.update_interval.set((int(value), None)[value == None])
 		await ctx.send("Changed the update interval, consider forcing an update to reset the active Timer")
 
 	async def generate_embed(self, guild: discord.Guild):
@@ -152,10 +154,10 @@ class SS13Mon(commands.Cog):
 			conn.close()
 
 	async def update_guild_message(self, guild: discord.Guild):
-		existing_timer: Timer = self._tick_timers.pop(guild.id, None)
-		if(not existing_timer == None): existing_timer.cancel()
-
+		local_hash = str(random.random())
 		cfg = self.config.guild(guild)
+		await cfg.update_hash.set(local_hash)
+
 		channel = await cfg.channel()
 		if(channel == None):
 			return
@@ -179,16 +181,12 @@ class SS13Mon(commands.Cog):
 		update_interval = await cfg.update_interval()
 		if(update_interval == None or update_interval == 0):
 			return
-
-		new_timer: Timer = Timer(update_interval, self._timer_wrapper, [guild])
-		self._tick_timers[guild.id] = new_timer
-		new_timer.start()
-	
-	def _timer_wrapper(self, guild):
-		loop = asyncio.new_event_loop()
-		task = loop.create_task(self.update_guild_message(guild))
-		loop.run_until_complete(task)
-		loop.close()
+		
+		await asyncio.sleep(update_interval)
+		actual_hash = await cfg.update_hash()
+		if(actual_hash != local_hash): # command was run again while we were sleeping
+			return
+		await self.update_guild_message(guild)
 	
 	async def delete_message(self, guild: discord.Guild):
 		cfg = self.config.guild(guild)
