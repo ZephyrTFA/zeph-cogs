@@ -77,7 +77,7 @@ class SS13Mon(commands.Cog):
 		roundid = int(status["round_id"][0])
 		player_count = int(status["players"][0])
 		time_dilation_avg = float(status["time_dilation_avg"][0])
-		players: list[str] = await self.query_server("localhost", 41372, "?whoIs")["players"]
+		players: list[str] = (await self.query_server("localhost", 41372, "?whoIs"))["players"]
 
 		dat: list[str] = list()
 		dat.append("Round ID: {}".format(roundid))
