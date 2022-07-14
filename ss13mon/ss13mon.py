@@ -11,14 +11,7 @@ import struct
 import urllib.parse
 
 class SS13Mon(commands.Cog):
-	_tick_timers: dict = dict()
 	config: Config
-
-	def cog_unload(self):
-		for key in self._tick_timers:
-			timer: Timer = self._tick_timers[key]
-			timer.cancel()
-		return super().cog_unload()
 
 	def __init__(self, bot: commands.Bot) -> None:
 		self.bot = bot
