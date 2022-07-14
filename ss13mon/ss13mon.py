@@ -139,7 +139,7 @@ class SS13Mon(commands.Cog):
 			except(discord.NotFound):
 				cached = await channel.send("caching initial context")
 		
-		cached.edit(content=None, embed=(await self.generate_embed(guild)))
+		await cached.edit(content=None, embed=(await self.generate_embed(guild)))
 	
 	async def delete_message(self, guild: discord.Guild):
 		cfg = self.config.guild(guild)
