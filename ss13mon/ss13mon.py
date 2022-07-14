@@ -71,8 +71,8 @@ class SS13Mon(commands.Cog):
 	
 	@commands.command()
 	@checks.is_owner()
-	async def test_update(self, ctx: commands.Context):
-		status = await self.query_server("localhost", 41372)
+	async def test_update(self, ctx: commands.Context, p=41372):
+		status = await self.query_server("localhost", p)
 
 		roundid = int(status["round_id"][0])
 		player_count = int(status["players"][0])
