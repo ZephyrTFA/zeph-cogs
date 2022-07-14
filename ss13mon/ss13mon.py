@@ -29,50 +29,7 @@ class SS13Mon(commands.Cog):
 			"last_title": None,
 			"last_online": None,
 		}
-		def_global = {
-			"active_guilds": []
-		}
 		self.config.register_guild(**def_guild)
-		self.config.register_global(**def_global)
-	
-	def cog_unload(self) -> None:
-		asyncio.run(self.stop_guilds())
-	
-	async def resume_guilds(self) -> None:
-		guilds = await self.config.active_guilds()
-		for guild in guilds:
-			guild = self.bot.get_guild(int(guild))
-			if(guild == None): raise IOError()
-			await self.start_guild(guild)
-	
-	async def stop_guilds(self) -> None:
-		guilds = await self.config.active_guilds()
-		for guild in guilds:
-			guild = self.bot.get_guild(int(guild))
-			if(guild == None): raise IOError()
-			await self.stop_guild(guild)
-
-	async def start_guild(self, guild: discord.Guild) -> None:
-		g_timer: Timer = self._tick_timers.get(str(guild.id), None)
-		if(g_timer != None): await self.stop_guild(guild)
-
-		interval = await self.config.guild(guild).update_interval()
-		if(isinstance(interval, float) == False): raise ArithmeticError()
-
-		g_timer = Timer(interval, self.__tick__, [guild])
-		self._tick_timers[str(guild.id)] = g_timer
-		g_timer.start()
-
-		g_guilds: list[discord.Guild] = await self.config.active_guilds()
-		g_guilds.append(str(guild.id))
-	
-	async def stop_guild(self, guild: discord.Guild) -> None:
-		g_timer: Timer = self._tick_timers.get(str(guild.id), None)
-		if(g_timer != None):
-			g_timer.cancel()
-			self._tick_timers.pop(str(guild.id), None)
-		g_guilds: list[discord.Guild] = await self.config.active_guilds()
-		g_guilds.pop(g_guilds.index(str(guild.id)))
 	
 	@commands.command()
 	async def ss13status(self, ctx: commands.Context, p=41372):
@@ -86,6 +43,9 @@ class SS13Mon(commands.Cog):
 			await cfg.address.set(value)
 		elif(key == "port"):
 			await cfg.port.set((int(value), None)[value == None])
+		elif(key == "update"):
+			await self.update_guild_message(ctx.guild)
+			await ctx.send("Forcibly triggered a guild update")
 		else:
 			await ctx.send("Not implemented yet")
 			return
@@ -154,6 +114,22 @@ class SS13Mon(commands.Cog):
 
 		finally:
 			conn.close()
-	
-	def __tick__(self, guild: discord.Guild) -> None:
-		return
+
+	async def update_guild_message(self, guild: discord.Guild):
+		cfg = self.config.guild(guild)
+		channel = await cfg.channel()
+		if(channel == None):
+			return
+		channel: discord.TextChannel = await guild.get_channel(channel)
+		if(isinstance(channel, discord.TextChannel) == False):
+			return
+		
+		message = await cfg.message_id()
+		cached: discord.Message
+		if(message == None):
+			cached = await channel.send("caching initial context")
+			await cfg.message_id.set(cached.id)
+		else:
+			cached = await channel.fetch_message(message)
+		
+		cached.edit(content=None, embed=(await self.generate_embed()))
