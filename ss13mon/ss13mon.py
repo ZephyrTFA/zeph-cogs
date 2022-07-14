@@ -77,9 +77,9 @@ class SS13Mon(commands.Cog):
 
 	@ss13mon.command()
 	async def update(self, ctx: commands.Context):
-		await self.update_guild_message(ctx.guild)
+		asyncio.get_event_loop().call_soon_threadsafe(self.update_guild_message(ctx.guild))
 		await ctx.send("Forced a guild update.")
-	
+
 	@ss13mon.command()
 	async def update_interval(self, ctx: commands.Context, value = None):
 		cfg = self.config.guild(ctx.guild)
