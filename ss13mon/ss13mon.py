@@ -37,22 +37,22 @@ class SS13Mon(commands.Cog):
 	
 	@commands.group()
 	@checks.admin()
-	async def ss13mon(self, ctx: commands.Context, key, value = None):
-		return
+	async def ss13mon(self, ctx: commands.Context):
+		pass
 	
-	@ss13mon.group()
+	@ss13mon.command()
 	async def address(self, ctx: commands.Context, value = None):
 		cfg = self.config.guild(ctx.guild)
 		await cfg.address.set(value)
 		await ctx.send("Updated the config entry for address.")
 
-	@ss13mon.group()
+	@ss13mon.command()
 	async def port(self, ctx: commands.Context, value = None):
 		cfg = self.config.guild(ctx.guild)
 		await cfg.port.set(value)
 		await ctx.send("Updated the config entry for port.")
 	
-	@ss13mon.group()
+	@ss13mon.command()
 	async def channel(self, ctx: commands.Context, value = None):
 		await self.delete_message(ctx.guild)
 		cfg = self.config.guild(ctx.guild)
@@ -60,7 +60,7 @@ class SS13Mon(commands.Cog):
 		await cfg.channel.set(value)
 		await ctx.send("Update the config entry for address and deleted the old message if found.")
 
-	@ss13mon.group()
+	@ss13mon.command()
 	async def update(self, ctx: commands.Context):
 		await self.update_guild_message(ctx.guild)
 		await ctx.send("Forced a guild update.")
