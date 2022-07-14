@@ -8,6 +8,20 @@ import socket
 import struct
 import urllib.parse
 
+class AsyncTimer:
+	def __init__(self, timeout, callback, args = []):
+		self._timeout = timeout
+		self._callback = callback
+		self._args = args
+		self._task = asyncio.ensure_future(self._job())
+
+	async def _job(self):
+		await asyncio.sleep(self._timeout)
+		await self._callback(*self._args)
+
+	def cancel(self):
+		self._task.cancel()
+
 class SS13Mon(commands.Cog):
 	_tick_timers: dict = dict()
 	config: Config
@@ -171,12 +185,12 @@ class SS13Mon(commands.Cog):
 		if(update_interval == None or update_interval == 0):
 			return
 
-		new_timer: Timer = Timer(update_interval, self._wrap_update, [guild])
+		new_timer: Timer = AsyncTimer(update_interval, self._wrap_update, [guild])
 		self._tick_timers[guild.id] = new_timer
 		new_timer.start()
 	
 	def _wrap_update(self, guild):
-		asyncio.run(self.update_guild_message(guild))
+		asyncio.gather(self.update_guild_message(guild))
 	
 	async def delete_message(self, guild: discord.Guild):
 		cfg = self.config.guild(guild)
