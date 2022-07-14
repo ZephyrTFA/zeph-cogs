@@ -3,7 +3,6 @@ from datetime import datetime
 from time import time
 import discord
 from redbot.core import commands, Config, checks
-from threading import Timer
 import socket
 import struct
 import urllib.parse
@@ -28,7 +27,7 @@ class SS13Mon(commands.Cog):
 
 	def cog_unload(self):
 		for key in self._tick_timers:
-			timer: Timer = self._tick_timers[key]
+			timer: AsyncTimer = self._tick_timers[key]
 			timer.cancel()
 		return super().cog_unload()
 
@@ -185,9 +184,8 @@ class SS13Mon(commands.Cog):
 		if(update_interval == None or update_interval == 0):
 			return
 
-		new_timer: Timer = AsyncTimer(update_interval, self._wrap_update, [guild])
+		new_timer: AsyncTimer = AsyncTimer(update_interval, self._wrap_update, [guild])
 		self._tick_timers[guild.id] = new_timer
-		new_timer.start()
 	
 	def _wrap_update(self, guild):
 		asyncio.gather(self.update_guild_message(guild))
