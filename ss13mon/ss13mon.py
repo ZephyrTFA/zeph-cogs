@@ -35,26 +35,35 @@ class SS13Mon(commands.Cog):
 	async def ss13status(self, ctx: commands.Context, p=41372):
 		await ctx.channel.send(embed=(await self.generate_embed(ctx.guild)))
 	
-	@commands.command()
+	@commands.group()
 	@checks.admin()
 	async def ss13mon(self, ctx: commands.Context, key, value = None):
+		return
+	
+	@ss13mon.group()
+	async def address(self, ctx: commands.Context, value = None):
 		cfg = self.config.guild(ctx.guild)
-		if(key == "address"):
-			await cfg.address.set(value)
-		elif(key == "port"):
-			await cfg.port.set((int(value), None)[value == None])
-		elif(key == "channel"):
-			await self.delete_message(ctx.guild)
-			await cfg.channel.set((int(value), None)[value == None])
-			await self.update_guild_message(ctx.guild)
-		elif(key == "update"):
-			await self.update_guild_message(ctx.guild)
-			await ctx.send("Forcibly triggered a guild update")
-		else:
-			await ctx.send("Not implemented yet")
-			return
-		
-		await ctx.send("{} is now set to {}".format(key, value))
+		await cfg.address.set(value)
+		await ctx.send("Updated the config entry for address.")
+
+	@ss13mon.group()
+	async def port(self, ctx: commands.Context, value = None):
+		cfg = self.config.guild(ctx.guild)
+		await cfg.port.set(value)
+		await ctx.send("Updated the config entry for port.")
+	
+	@ss13mon.group()
+	async def channel(self, ctx: commands.Context, value = None):
+		await self.delete_message(ctx.guild)
+		cfg = self.config.guild(ctx.guild)
+		if(not value == None): value = int(value)
+		await cfg.channel.set(value)
+		await ctx.send("Update the config entry for address and deleted the old message if found.")
+
+	@ss13mon.group()
+	async def update(self, ctx: commands.Context):
+		await self.update_guild_message(ctx.guild)
+		await ctx.send("Forced a guild update.")
 
 	async def generate_embed(self, guild: discord.Guild):
 		cfg = self.config.guild(guild)
