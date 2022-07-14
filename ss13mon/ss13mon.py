@@ -87,6 +87,7 @@ class SS13Mon(commands.Cog):
 		player_count = int(status["players"][0])
 		time_dilation_avg = float(status["time_dilation_avg"][0])
 		players: list[str] = (await self.query_server("localhost", 41372, "?whoIs"))["players"]
+		players.sort()
 
 		await cfg.last_roundid.set(roundid)
 		await cfg.last_title.set(servtitle)
