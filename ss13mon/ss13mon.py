@@ -155,6 +155,9 @@ class SS13Mon(commands.Cog):
 		if(message == None):
 			return
 		else:
-			cached = await channel.fetch_message(message)
+			try:
+				cached = await channel.fetch_message(message)
+			except(discord.NotFound):
+				return
 		
 		await cached.delete()
