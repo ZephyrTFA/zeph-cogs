@@ -3,7 +3,7 @@ from datetime import datetime
 from threading import Timer
 from time import time
 import discord
-from redbot.core import commands, Config, checks
+from redbot.core import commands, Config, checks, utils
 import socket
 import struct
 import urllib.parse
@@ -43,6 +43,15 @@ class SS13Mon(commands.Cog):
 	@checks.admin()
 	async def ss13mon(self, ctx: commands.Context):
 		pass
+
+	@ss13mon.command()
+	async def current(self, ctx: commands.Context):
+		cfg = self.config.guild(ctx.guild)
+		address = await cfg.address()
+		port =  await cfg.port()
+		channel =  await cfg.channel()
+		update_interval =  await cfg.update_interval()
+		await ctx.send("Current Config: ```\naddress: {}\nport: {}\nchannel: {}\nupdate_interval: {}\n```".format(address, port, channel, update_interval))
 	
 	@ss13mon.command()
 	async def address(self, ctx: commands.Context, value = None):
@@ -175,7 +184,7 @@ class SS13Mon(commands.Cog):
 		self._tick_timers[guild.id] = new_timer
 	
 	def _timer_wrapper(self, guild):
-		asyncio.gather(self.update_guild_message(guild))
+		utils.bounded_gather(self.update_guild_message(guild))
 	
 	async def delete_message(self, guild: discord.Guild):
 		cfg = self.config.guild(guild)
