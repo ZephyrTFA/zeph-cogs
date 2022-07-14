@@ -185,9 +185,7 @@ class SS13Mon(commands.Cog):
 		new_timer.start()
 	
 	def _timer_wrapper(self, guild):
-		loop = asyncio.get_event_loop()
-		loop.run_until_complete(self.update_guild_message(guild))
-		loop.close()
+		asyncio.run(self.update_guild_message(guild))
 	
 	async def delete_message(self, guild: discord.Guild):
 		cfg = self.config.guild(guild)
