@@ -79,8 +79,14 @@ class SS13Mon(commands.Cog):
 		time_dilation_avg = float(status["time_dilation_avg"][0])
 		players: list[str] = (await self.query_server("localhost", 41372, "?whoIs"))["players"]
 		embbie: discord.Embed = discord.Embed(type="rich", title=status["version"][0], timestamp=datetime.now())
-		embbie.add_field("Visible Players ({})".format(len(players)), "```{}```".format(", ".join(players)))
-		embbie.add_field("Server Information", "Round ID: `{}`\nPlayers: `{}`\nTIDI: `{}%`".format(roundid, player_count, time_dilation_avg))
+
+		field_visi = "Visible Players ({})".format(len(players))
+		value_visi = "```{}```".format(", ".join(players))
+		embbie.add_field(field_visi, value_visi)
+
+		value_inf = "Round ID: `{}`\nPlayers: `{}`\nTIDI: `{}%`".format(roundid, player_count, time_dilation_avg)
+		embbie.add_field("Server Information", value_inf)
+
 		await ctx.channel.send(embed=embbie)
 
 	async def update_guild(self, guild: discord.Guild):
