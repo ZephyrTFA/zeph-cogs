@@ -1,5 +1,7 @@
 import asyncio
 from datetime import datetime
+from dis import disco
+from sqlite3 import Timestamp
 from time import time
 import discord
 from redbot.core import commands, Config, checks
@@ -73,21 +75,42 @@ class SS13Mon(commands.Cog):
 		g_guilds.pop(g_guilds.index(str(guild.id)))
 	
 	@commands.command()
-	@checks.is_owner()
-	async def test_update(self, ctx: commands.Context, p=41372):
+	async def ss13status(self, ctx: commands.Context, p=41372):
+		await ctx.channel.send(embed=self.generate_embed(ctx.guild))
+	
+	@commands.command()
+	@checks.admin()
+	async def ss13mon(self, ctx: commands.Context, key, value = None):
 		cfg = self.config.guild(ctx.guild)
-		status = await self.query_server("localhost", p)
+		if(key == "address"):
+			await cfg.address.set(value)
+		elif(key == "port"):
+			await cfg.port.set((int(value), None)[value == None])
+		else:
+			await ctx.send("Not implemented yet")
+			return
+		
+		await ctx.send("{} is now set to {}".format(key, value))
+
+	async def generate_embed(self, guild: discord.Guild):
+		cfg = self.config.guild(guild)
+		address = await cfg.address()
+		port = await cfg.port()
+
+		if(address == None or port == None):
+			return discord.Embed(type="rich", title="FAILED TO GENERATE EMBED", timestamp=datetime.now(), description="ADDRESS OR PORT NOT SET")
+
+		status = await self.query_server(address, port)
 		if(status == None):
 			last_roundid = (await cfg.last_roundid()) or "Unknown"
 			last_title = (await cfg.last_title()) or "Failed to fetch data"
 			last_online = await cfg.last_online() or "Unknown"
 			if(isinstance(last_online, float)): last_online = datetime.fromtimestamp(last_online)
-			await ctx.channel.send(embed=discord.Embed(type="rich", color=discord.Colour.red(), title=last_title, timestamp=datetime.now()).add_field(name="Server Offline", value="Last Round: `{}`\nLast Seen: `{}`".format(last_roundid, last_online)))
-			return
+			return discord.Embed(type="rich", color=discord.Colour.red(), title=last_title, timestamp=datetime.now()).add_field(name="Server Offline", value="Last Round: `{}`\nLast Seen: `{}`".format(last_roundid, last_online))
 
 		roundid = int(status["round_id"][0])
 		servtitle = status["version"][0]
-		await self.config.guild(ctx.guild).last_roundid.set(roundid)
+		await self.config.guild(guild).last_roundid.set(roundid)
 		player_count = int(status["players"][0])
 		time_dilation_avg = float(status["time_dilation_avg"][0])
 		players: list[str] = (await self.query_server("localhost", 41372, "?whoIs"))["players"]
@@ -105,22 +128,7 @@ class SS13Mon(commands.Cog):
 		value_visi = "```{}```".format(", ".join(players))
 		embbie.add_field(name=field_visi, value=value_visi)
 
-		await ctx.channel.send(embed=embbie)
-
-	async def update_guild(self, guild: discord.Guild):
-		cfg = self.config.guild(guild)
-		channel: discord.TextChannel = guild.get_channel(await cfg.channel())
-		address = await cfg.address()
-		port = await cfg.port()
-		message = await cfg.message_id()
-
-		if(channel == None or address == None or port == None):
-			raise Exception("Missing critical information for updating guild information")
-		
-		status = await self.query_server(address, port)
-		for key in status:
-			val = status[key]
-			await channel.send("{} = {}".format(key, val))
+		return embbie
 	
 	async def query_server(self, game_server:str, game_port:int, querystr="?status" ) -> dict:
 		"""
