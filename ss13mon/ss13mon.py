@@ -3,6 +3,7 @@ from datetime import datetime
 from dis import disco
 from sqlite3 import Timestamp
 from time import time
+from turtle import update
 import discord
 from redbot.core import commands, Config, checks
 from threading import Timer
@@ -13,6 +14,12 @@ import urllib.parse
 class SS13Mon(commands.Cog):
 	_tick_timers: dict
 	config: Config
+
+	def cog_unload(self):
+		for key in self._tick_timers:
+			timer: Timer = self._tick_timers[key]
+			timer.cancel()
+		return super().cog_unload()
 
 	def __init__(self, bot: commands.Bot) -> None:
 		self.bot = bot
@@ -64,6 +71,12 @@ class SS13Mon(commands.Cog):
 	async def update(self, ctx: commands.Context):
 		await self.update_guild_message(ctx.guild)
 		await ctx.send("Forced a guild update.")
+	
+	@ss13mon.command()
+	async def update_interval(self, ctx: commands.Context, value = None):
+		cfg = self.config.guild(ctx.guild)
+		await cfg.update_interval.set(value)
+		await ctx.send("Changed the update interval, consider forcing an update to reset the active Timer")
 
 	async def generate_embed(self, guild: discord.Guild):
 		cfg = self.config.guild(guild)
@@ -93,7 +106,13 @@ class SS13Mon(commands.Cog):
 		await cfg.last_title.set(servtitle)
 		await cfg.last_online.set(time())
 
-		embbie: discord.Embed = discord.Embed(type="rich", color=discord.Colour.blue(), title=servtitle, timestamp=datetime.now())
+		update_interval = await cfg.update_interval()
+		if(update_interval == None or update_interval == 0):
+			update_interval = "Auto Updates disabled"
+		else:
+			update_interval = "Auto Updates every {} seconds".format(update_interval)
+
+		embbie: discord.Embed = discord.Embed(type="rich", color=discord.Colour.blue(), title=servtitle, timestamp=datetime.now(), footer=update_interval)
 
 		value_inf = "Round ID: `{}`\nPlayers: `{}`\nTIDI: `{}%`".format(roundid, player_count, time_dilation_avg)
 		embbie.add_field(name="Server Information", value=value_inf)
@@ -151,6 +170,16 @@ class SS13Mon(commands.Cog):
 				await cfg.message_id.set(cached.id)
 		
 		await cached.edit(content=None, embed=(await self.generate_embed(guild)))
+		update_interval = await cfg.update_interval()
+		if(update_interval == None or update_interval == 0):
+			return
+
+		new_timer: Timer = Timer(update_interval, self._wrap_update, [guild])
+		self._tick_timers[guild.id] = new_timer
+		new_timer.start()
+	
+	def _wrap_update(self, guild):
+		asyncio.run(self.update_guild_message(guild))
 	
 	async def delete_message(self, guild: discord.Guild):
 		cfg = self.config.guild(guild)
