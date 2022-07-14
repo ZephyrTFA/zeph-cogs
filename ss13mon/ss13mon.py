@@ -87,7 +87,7 @@ class SS13Mon(commands.Cog):
 		dat.append(", ".join(players))
 		dat.append("```")
 
-		embed_builder: discord.Embed = discord.Embed(type="rich", title=status["version"], timestamp=datetime.now(), desc="\n".join(dat))
+		embed_builder: discord.Embed = discord.Embed(type="rich", title=status["version"][0], timestamp=datetime.now(), description="\n".join(dat))
 		await ctx.channel.send(embed=embed_builder)
 
 	async def update_guild(self, guild: discord.Guild):
