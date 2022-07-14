@@ -34,7 +34,7 @@ class SS13Mon(commands.Cog):
 			"last_online": None,
 		}
 		self.config.register_guild(**def_guild)
-	
+
 	@commands.command()
 	async def ss13status(self, ctx: commands.Context, p=41372):
 		await ctx.channel.send(embed=(await self.generate_embed(ctx.guild)))
@@ -182,6 +182,7 @@ class SS13Mon(commands.Cog):
 
 		new_timer: Timer = Timer(update_interval, self._timer_wrapper, [guild])
 		self._tick_timers[guild.id] = new_timer
+		new_timer.start()
 	
 	def _timer_wrapper(self, guild):
 		utils.bounded_gather(self.update_guild_message(guild))
