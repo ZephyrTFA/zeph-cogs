@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime
 import random
+from sys import stdout
 from threading import Timer
 from time import time
 import discord
@@ -182,6 +183,8 @@ class SS13Mon(commands.Cog):
 		if(update_interval == None or update_interval == 0):
 			return
 		
+		stdout.write("updated guild message and now sleeping for: {} seconds\n".format(update_interval))
+		stdout.flush()
 		await asyncio.sleep(update_interval)
 		actual_hash = await cfg.update_hash()
 		if(actual_hash != local_hash): # command was run again while we were sleeping
