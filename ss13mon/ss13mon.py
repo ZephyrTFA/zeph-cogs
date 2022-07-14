@@ -72,6 +72,10 @@ class SS13Mon(commands.Cog):
 	@checks.is_owner()
 	async def test_update(self, ctx: commands.Context):
 		status = await self.query_server("localhost", 41372)
+		for key in ["round_id", "players", "admins", "time_dilation_avg"]:
+			val = status[key]
+			await ctx.send("{} = {}".format(key, val))
+		status = await self.query_server("localhost", 41372, "?whoIs")
 		for key in status:
 			val = status[key]
 			await ctx.send("{} = {}".format(key, val))
