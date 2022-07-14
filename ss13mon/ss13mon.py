@@ -1,12 +1,12 @@
 import asyncio
 from datetime import datetime
+from time import time
 import discord
 from redbot.core import commands, Config, checks
 from threading import Timer
 import socket
 import struct
 import urllib.parse
-import html.parser as htmlparser
 
 class SS13Mon(commands.Cog):
 	_tick_timers: dict
@@ -21,8 +21,11 @@ class SS13Mon(commands.Cog):
 			"channel": None,
 			"address": None,
 			"port": None,
-			"topic_key": None,
-			"message_id": None
+			"message_id": None,
+			# internal status values
+			"last_roundid": None,
+			"last_title": None,
+			"last_online": None,
 		}
 		def_global = {
 			"active_guilds": []
@@ -72,20 +75,34 @@ class SS13Mon(commands.Cog):
 	@commands.command()
 	@checks.is_owner()
 	async def test_update(self, ctx: commands.Context, p=41372):
+		cfg = self.config.guild(ctx.guild)
 		status = await self.query_server("localhost", p)
+		if(status == None):
+			last_roundid = (await cfg.last_roundid()) or "Unknown"
+			last_title = (await cfg.last_title()) or "Failed to fetch data"
+			last_online = (datetime.fromtimestamp(await cfg.last_online())) or "Unknown"
+			await ctx.channel.send(embed=discord.Embed(type="rich", color=discord.Colour.red, title=last_title, timestamp=datetime.now()).add_field(name="Server Offline", value="Last Round: `{}`\nLast Seen: `{}`".format(last_roundid, last_online)))
+			return
 
 		roundid = int(status["round_id"][0])
+		servtitle = status["version"][0]
+		await self.config.guild(ctx.guild).last_roundid.set(roundid)
 		player_count = int(status["players"][0])
 		time_dilation_avg = float(status["time_dilation_avg"][0])
 		players: list[str] = (await self.query_server("localhost", 41372, "?whoIs"))["players"]
-		embbie: discord.Embed = discord.Embed(type="rich", title=status["version"][0], timestamp=datetime.now())
+
+		await cfg.last_roundid.set(roundid)
+		await cfg.last_title.set(servtitle)
+		await cfg.last_online.set(time())
+
+		embbie: discord.Embed = discord.Embed(type="rich", color=discord.Colour.blue, title=servtitle, timestamp=datetime.now())
+
+		value_inf = "Round ID: `{}`\nPlayers: `{}`\nTIDI: `{}%`".format(roundid, player_count, time_dilation_avg)
+		embbie.add_field(name="Server Information", value=value_inf)
 
 		field_visi = "Visible Players ({})".format(len(players))
 		value_visi = "```{}```".format(", ".join(players))
 		embbie.add_field(name=field_visi, value=value_visi)
-
-		value_inf = "Round ID: `{}`\nPlayers: `{}`\nTIDI: `{}%`".format(roundid, player_count, time_dilation_avg)
-		embbie.add_field(name="Server Information", value=value_inf)
 
 		await ctx.channel.send(embed=embbie)
 
