@@ -76,7 +76,7 @@ class SS13Mon(commands.Cog):
 	
 	@commands.command()
 	async def ss13status(self, ctx: commands.Context, p=41372):
-		await ctx.channel.send(embed=self.generate_embed(ctx.guild))
+		await ctx.channel.send(embed=(await self.generate_embed(ctx.guild)))
 	
 	@commands.command()
 	@checks.admin()
