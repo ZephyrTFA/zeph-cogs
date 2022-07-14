@@ -124,7 +124,7 @@ class SS13Mon(commands.Cog):
 		channel = await cfg.channel()
 		if(channel == None):
 			return
-		channel: discord.TextChannel = await guild.get_channel(channel)
+		channel: discord.TextChannel = guild.get_channel(channel)
 		if(isinstance(channel, discord.TextChannel) == False):
 			return
 		
@@ -144,7 +144,7 @@ class SS13Mon(commands.Cog):
 		channel = await cfg.channel()
 		if(channel == None):
 			return
-		channel: discord.TextChannel = await guild.get_channel(channel)
+		channel: discord.TextChannel = guild.get_channel(channel)
 		if(isinstance(channel, discord.TextChannel) == False):
 			return
 		
