@@ -5,6 +5,7 @@ from threading import Timer
 import socket
 import struct
 import urllib.parse
+import html.parser as htmlparser
 
 class SS13Mon(commands.Cog):
 	_tick_timers: dict
@@ -80,7 +81,6 @@ class SS13Mon(commands.Cog):
 		channel: discord.TextChannel = guild.get_channel(await cfg.channel())
 		address = await cfg.address()
 		port = await cfg.port()
-		topic_key = await cfg.topic_key() or ""
 		message = await cfg.message_id()
 
 		if(channel == None or address == None or port == None):
@@ -99,7 +99,7 @@ class SS13Mon(commands.Cog):
 
 		try:
 			query = b"\x00\x83" + struct.pack('>H', len(querystr) + 6) + b"\x00\x00\x00\x00\x00" + querystr.encode() + b"\x00" #Creates a packet for byond according to TG's standard
-			conn.settimeout(await self.config.timeout()) #Byond is slow, timeout set relatively high to account for any latency
+			conn.settimeout(20) #Byond is slow, timeout set relatively high to account for any latency
 			conn.connect((game_server, game_port)) 
 
 			conn.sendall(query)
@@ -117,12 +117,4 @@ class SS13Mon(commands.Cog):
 			conn.close()
 	
 	def __tick__(self, guild: discord.Guild) -> None:
-		return
-	
-	@commands.group()
-	async def ss13mon(self, ctx):
-		return
-	
-	@ss13mon.group()
-	async def who(self, ctx: commands.Context):
 		return
