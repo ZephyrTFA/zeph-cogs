@@ -2,7 +2,6 @@ import asyncio
 from datetime import datetime
 from threading import Timer
 from time import time
-from turtle import update
 import discord
 from redbot.core import commands, Config, checks
 import socket
