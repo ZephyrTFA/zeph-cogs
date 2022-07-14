@@ -39,12 +39,12 @@ class SS13Mon(commands.Cog):
 		self.config.register_guild(**def_guild)
 		for guild in self.bot.guilds:
 			self.start_guild_update_loop(guild)
-	
+
 	def start_guild_update_loop(self, guild):
 		task = asyncio.get_event_loop().create_task(self.update_guild_message(guild))
 		self._tasks.append(task)
 		task.add_done_callback(self._handle_task_completion)
-	
+
 	def _handle_task_completion(self, future: asyncio.Task):
 		self._tasks.remove(future)
 
@@ -138,7 +138,7 @@ class SS13Mon(commands.Cog):
 		embbie.add_field(name=field_visi, value=value_visi)
 
 		return embbie
-	
+
 	async def query_server(self, game_server:str, game_port:int, querystr="?status" ) -> dict:
 		"""
 		Queries the server for information
@@ -175,7 +175,7 @@ class SS13Mon(commands.Cog):
 		channel: discord.TextChannel = guild.get_channel(channel)
 		if(isinstance(channel, discord.TextChannel) == False):
 			return
-		
+
 		message = await cfg.message_id()
 		cached: discord.Message
 		if(message == None):
@@ -187,20 +187,18 @@ class SS13Mon(commands.Cog):
 			except(discord.NotFound):
 				cached = await channel.send("caching initial context")
 				await cfg.message_id.set(cached.id)
-		
+
 		await cached.edit(content=None, embed=(await self.generate_embed(guild)))
 		update_interval = await cfg.update_interval()
 		if(update_interval == None or update_interval == 0):
 			return
-		
-		stdout.write("updated guild message and now sleeping for: {} seconds\n".format(update_interval))
-		stdout.flush()
+
 		await asyncio.sleep(update_interval)
 		actual_hash = await cfg.update_hash()
 		if(actual_hash != local_hash): # command was run again while we were sleeping
 			return
 		await self.update_guild_message(guild)
-	
+
 	async def delete_message(self, guild: discord.Guild):
 		cfg = self.config.guild(guild)
 		channel = await cfg.channel()
@@ -209,7 +207,7 @@ class SS13Mon(commands.Cog):
 		channel: discord.TextChannel = guild.get_channel(channel)
 		if(isinstance(channel, discord.TextChannel) == False):
 			return
-		
+
 		message = await cfg.message_id()
 		cached: discord.Message
 		if(message == None):
@@ -219,5 +217,5 @@ class SS13Mon(commands.Cog):
 				cached = await channel.fetch_message(message)
 			except(discord.NotFound):
 				return
-		
+
 		await cached.delete()
