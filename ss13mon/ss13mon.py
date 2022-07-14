@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime
 from threading import Timer
 from time import time
+from turtle import update
 import discord
 from redbot.core import commands, Config, checks
 import socket
@@ -104,14 +105,11 @@ class SS13Mon(commands.Cog):
 		await cfg.last_online.set(time())
 
 		update_interval = await cfg.update_interval()
-		if(update_interval == None or update_interval == 0):
-			update_interval = "Auto Updates disabled"
-		else:
-			update_interval = "Auto Updates every {} seconds".format(update_interval)
+		if(update_interval == None):
+			update_interval = 0
+		embbie: discord.Embed = discord.Embed(type="rich", color=discord.Colour.blue(), title=servtitle, timestamp=datetime.now())
 
-		embbie: discord.Embed = discord.Embed(type="rich", color=discord.Colour.blue(), title=servtitle, timestamp=datetime.now(), footer=update_interval)
-
-		value_inf = "Round ID: `{}`\nPlayers: `{}`\nTIDI: `{}%`".format(roundid, player_count, time_dilation_avg)
+		value_inf = "Round ID: `{}`\nPlayers: `{}`\nTIDI: `{}%`\nNext Update: `{}`".format(roundid, player_count, time_dilation_avg, ("{}s".format(update_interval), "Disabled")[update_interval == 0])
 		embbie.add_field(name="Server Information", value=value_inf)
 
 		field_visi = "Visible Players ({})".format(len(players))
