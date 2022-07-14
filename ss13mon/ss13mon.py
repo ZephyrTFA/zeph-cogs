@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 import discord
 from redbot.core import commands, Config, checks
 from threading import Timer
@@ -75,10 +76,15 @@ class SS13Mon(commands.Cog):
 		for key in ["round_id", "players", "admins", "time_dilation_avg"]:
 			val = status[key]
 			await ctx.send("{} = {}".format(key, val))
-		status = await self.query_server("localhost", 41372, "?whoIs")
-		for key in status:
-			val = status[key]
-			await ctx.send("{} = {}".format(key, val))
+		
+		roundid = int(status["round_id"])
+		player_count = int(status["players"])
+		admin_count = int(status["admins"])
+		time_dilation_avg = float(status["time_dilation_avg"])
+		players: list[str] = await self.query_server("localhost", 41372, "?whoIs")["players"]
+
+		embed_builder: discord.Embed = discord.Embed(type="rich", title=status["version"], timestamp=datetime.now(), desc="")
+		await ctx.channel.send(embed=embed_builder)
 
 	async def update_guild(self, guild: discord.Guild):
 		cfg = self.config.guild(guild)
